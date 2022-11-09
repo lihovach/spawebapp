@@ -1,0 +1,57 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  creationTimestamp: null
+  labels:
+    app: spaapp-nginx
+  name: spaapp-nginx
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: spaapp-nginx
+  template:
+    metadata:
+      labels:
+        app: spaapp-nginx
+    spec:
+      containers:
+      - image: lihovach/spaapp_nginx
+        name: spaapp-nginx
+        resources: {}
+        ports:
+        - containerPort: 80
+          name: http
+          protocol: TCP
+
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: spaapp-nginx-service
+spec:
+  selector:
+    app: spaapp-nginx
+  ports:
+    - name: http
+      port: 80
+      protocol: TCP
+      targetPort: 80
+  type: ClusterIP
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: spaapp
+spec:
+  rules:
+  - host: spaapp.local
+    http:
+      paths:
+      - backend:
+          service:
+            name: spaapp-nginx-service
+            port: 
+              name: http
+        path: /
+        pathType: ImplementationSpecific
